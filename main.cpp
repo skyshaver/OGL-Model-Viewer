@@ -12,17 +12,19 @@
 #include "Shader.h"
 #include "Camera.h"
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 1000;
 
 // camera
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
 float lastX = SCR_WIDTH / 2.f;
 float lastY = SCR_HEIGHT / 2.f;
 bool firstMouse = true;
-
+// time delta
 float deltaTime = 0.f;
 float lastFrame = 0.f;
+// light box pos
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -43,7 +45,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	lastX = xpos;
 	lastY = ypos;
-	//std::cout << xpos << " " << ypos << "\n";
+
 	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
@@ -184,59 +186,35 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
 
-glm::vec3 cubePositions[] = {
-	  glm::vec3(0.0f,  0.0f,  0.0f),
-	  glm::vec3(2.0f,  5.0f, -15.0f),
-	  glm::vec3(-1.5f, -2.2f, -2.5f),
-	  glm::vec3(-3.8f, -2.0f, -12.3f),
-	  glm::vec3(2.4f, -0.4f, -3.5f),
-	  glm::vec3(-1.7f,  3.0f, -7.5f),
-	  glm::vec3(1.3f, -2.0f, -2.5f),
-	  glm::vec3(1.5f,  2.0f, -2.5f),
-	  glm::vec3(1.5f,  0.2f, -1.5f),
-	  glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
 
-
-	unsigned int indices[] = {  // note that we start from 0!
-	0, 1, 3,   // first triangle
-	1, 2, 3    // second triangle
-	};
-	// end
-
-	Shader shaderObject("shaders/shader.vert", "shaders/shader.frag");
+	Shader lightingShader("shaders/shader.vert", "shaders/shader.frag");
+	Shader lampShader("shaders/light_shader.vert", "shaders/light_shader.frag");
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	unsigned int VBO, VAO; //EBO;	// vertex buffer object, vertex arrray object, element buffer object
-	glGenVertexArrays(1, &VAO);
+	// buffer for boxes
+	unsigned int VBO, cubeVAO;// vertex buffer object, vertex arrray object, element buffer object
+	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &VBO);
-	// glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(cubeVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 	// pos attrib
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	//// color attrib
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-	// texture attrib
-	/*glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
-	unsigned int texture1 = createTexture("textures/old_geo.jpg");
-	unsigned int texture2 = createTexture("textures/old_geo_02.jpg");*/
-
-	shaderObject.use();
-	/*shaderObject.setInt("texture1", 0);
-	shaderObject.setInt("texture2", 1);*/
+	// buffer for lighting object
+	unsigned int lightVAO;
+	glGenVertexArrays(1, &lightVAO);
+	glBindVertexArray(lightVAO);
+	// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; 
+	// the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glad_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -247,46 +225,40 @@ glm::vec3 cubePositions[] = {
 		processInput(window);
 
 		// render commands
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// bind textures on corresponding texture units
-		/*glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);*/
-		// activate shader
-		shaderObject.use();
-		
-		// pass projection matrix to shader
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f);
-		shaderObject.setMat4("projection", projection);
-		// pass view matrix to shader
-		glm::mat4 view = camera.GetViewMatrix();
-		shaderObject.setMat4("view", view);	
 
-		// render container
-		glBindVertexArray(VAO);
-		for (size_t i = 0; i < 10; i++)
-		{
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.f * i;
-			if (i % 3 == 0) 
-			{
-				model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.f), glm::vec3(0.5f, 1.f, 1.f));
-			}
-			else
-			{
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.f, 0.3f, 0.5f));
-			}
-			
-			/*unsigned int modelLoc = glad_glGetUniformLocation(shaderObject.ID, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));*/
-			shaderObject.setMat4("model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		// activate shaders
+		lightingShader.use();
+		glm::vec3 objectColor(1.f, 0.5f, 0.31f);
+		glm::vec3 lightColor(1.f, 1.f, 1.f);
+		lightingShader.setVec3("objectColor", objectColor);
+		lightingShader.setVec3("lightColor", lightColor);
+
 		
-		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom * 2), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f);	
+		glm::mat4 view = camera.GetViewMatrix();
+		lightingShader.setMat4("projection", projection);
+		lightingShader.setMat4("view", view);	
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		lightingShader.setMat4("model", model);
+		// render cube
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		// render lamp object
+		lampShader.use();
+		lampShader.setMat4("projection", projection);
+		lampShader.setMat4("view", view);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+		lampShader.setMat4("model", model);
+		// render lamp object
+		glBindVertexArray(lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
 		//____________________________
 		glfwSwapBuffers(window);
 		glfwPollEvents();
