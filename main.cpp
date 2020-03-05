@@ -1,4 +1,7 @@
+
 #include <glad/glad.h>
+
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 
@@ -20,7 +23,7 @@
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 1000;
 
-// camera
+// camera, this is global so that the keyboard control callbacks have access
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
 float lastX = SCR_WIDTH / 2.f;
 float lastY = SCR_HEIGHT / 2.f;
@@ -125,6 +128,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	const char* glsl_version = "#version 330";
+
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOGL", nullptr, nullptr);
 	if (window == nullptr)
 	{
@@ -146,7 +151,7 @@ int main()
 		return -1;
 	}
 
-	TextObject textObject{};
+	TextObject textObject("fonts/arial.ttf");
 
 	float vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -214,7 +219,7 @@ int main()
 	glEnableVertexAttribArray(0);
 	// normal attrib
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glad_glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(1);
 
 
 	// buffer for lighting object
@@ -239,6 +244,7 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+
 	int countedFrames = 0;
 	int fps = 0;
 	while (!glfwWindowShouldClose(window))
@@ -250,6 +256,11 @@ int main()
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		
+		float xValue = 2.0f * (sin(currentFrame));
+		float zValue = 1.5f * (cos(currentFrame));
+		lightPos = glm::vec3(xValue, 1.f, zValue);
 
 		processInput(window);
 
@@ -264,6 +275,7 @@ int main()
 		lightingShader.setVec3("objectColor", objectColor);
 		lightingShader.setVec3("lightColor", lightColor);
 		lightingShader.setVec3("lightPos", lightPos);
+		lightingShader.setVec3("viewPos", camera.Position);
 
 		
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom * 2), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f);	
@@ -296,7 +308,7 @@ int main()
 		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), 25.f, 25.f, 0.25f, glm::vec3(0.5f, 0.8f, 0.2f), textVAO, textVBO);
 		textObject.RenderText(textShader, "Camera xpos: " + std::to_string(camera.Position.x) + 
 			 " ypos: " + std::to_string(camera.Position.y), 25.f, 50.f, 0.25f, glm::vec3(1.f, 0.f, 0.f), textVAO, textVBO);
-		
+
 		//____________________________
 		glfwSwapBuffers(window);
 		glfwPollEvents();

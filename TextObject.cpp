@@ -1,13 +1,13 @@
 #include "TextObject.h"
 
-void TextObject::initFreeType()
+void TextObject::initFreeType(std::string fontPath)
 {	
 	if (FT_Init_FreeType(&ft))
 	{
 		std::cout << "ERROR::FREETYPE: could not init FreeType Library" << std::endl;
 	}
 	
-	if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+	if (FT_New_Face(ft, fontPath.c_str(), 0, &face))
 	{
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 	}

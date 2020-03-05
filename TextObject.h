@@ -33,13 +33,13 @@ private:
 	FT_Face face;
 	
 public:
-	// constructor is broken?
-	TextObject() {
-		initFreeType();
+	
+	TextObject(std::string fontPath) {
+		initFreeType(fontPath);
 		Characters = createCharacterMap();
 	}
 
-	void initFreeType();
+	void initFreeType(std::string fontPath);
 
 	CharacterMap createCharacterMap();
 
