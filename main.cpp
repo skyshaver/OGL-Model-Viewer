@@ -1,6 +1,5 @@
 
 #include <glad/glad.h>
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -257,11 +256,6 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		
-		float xValue = 2.0f * (sin(currentFrame));
-		float zValue = 1.5f * (cos(currentFrame));
-		lightPos = glm::vec3(xValue, 1.f, zValue);
-
 		processInput(window);
 
 		// render commands
@@ -270,13 +264,39 @@ int main()
 
 		// activate lighting shaders
 		lightingShader.use();
-		glm::vec3 objectColor(1.f, 0.5f, 0.31f);
-		glm::vec3 lightColor(1.f, 1.f, 1.f);
-		lightingShader.setVec3("objectColor", objectColor);
-		lightingShader.setVec3("lightColor", lightColor);
-		lightingShader.setVec3("lightPos", lightPos);
+		
 		lightingShader.setVec3("viewPos", camera.Position);
 
+		// uuniforms for lighting material
+
+		// rotating the light
+		/*float xValue = 2.0f * (sin(currentFrame));
+		float zValue = 1.5f * (cos(currentFrame));
+		lightPos = glm::vec3(xValue, 1.f, zValue);*/
+		lightingShader.setVec3("light.pos", lightPos);
+
+		// this is for influencing the other light colors
+		glm::vec3 lightColor;
+		lightColor.x = sin(glfwGetTime() * 2.0f);
+		lightColor.y = sin(glfwGetTime() * 0.7f);
+		lightColor.z = sin(glfwGetTime() * 1.3f);
+
+		glm::vec3 ambientColor = lightColor * glm::vec3(0.2);
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5);
+		glm::vec3 specularColor(1.0f, 1.0f, 1.0f);
+		lightingShader.setVec3("light.ambientColor", ambientColor);
+		lightingShader.setVec3("light.diffuseColor", diffuseColor);
+		lightingShader.setVec3("light.specularColor", specularColor);
+
+
+		// uniforms for material
+		glm::vec3 ambient(1.0f, 0.5f, 0.31f);
+		glm::vec3 diffuse(1.0f, 0.5f, 0.31f);
+		glm::vec3 specular(0.5f, 0.5f, 0.5f);
+		lightingShader.setVec3("material.ambient", ambient);
+		lightingShader.setVec3("material.diffuse", diffuse);
+		lightingShader.setVec3("material.specular", specular);
+		lightingShader.setFloat("material.shininess", 32.0f);
 		
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom * 2), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f);	
 		glm::mat4 view = camera.GetViewMatrix();
