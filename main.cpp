@@ -253,6 +253,22 @@ int main()
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 
+	// positions all containers
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+
+
 	Shader lightingShader("shaders/shader.vert", "shaders/shader.frag");
 	Shader lampShader("shaders/light_shader.vert", "shaders/light_shader.frag");
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
@@ -335,11 +351,13 @@ int main()
 
 		// uuniforms for lighting material
 
-		// rotating the light
+		// rotating the lamp
 		/*float xValue = 2.0f * (sin(currentFrame));
 		float zValue = 1.5f * (cos(currentFrame));
 		lightPos = glm::vec3(xValue, 1.f, zValue);*/
-		lightingShader.setVec3("light.pos", lightPos);
+		
+		glm::vec3 lightDirection{ -0.2f, -1.0f, -0.3f };
+		lightingShader.setVec3("light.direction", lightDirection);
 
 		// this is for influencing the other light colors
 		/*glm::vec3 lightColor;
@@ -379,21 +397,35 @@ int main()
 		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
 		lightingShader.setMat4("model", model);
-		// render cube
-		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//// render cube
+		//glBindVertexArray(cubeVAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			lightingShader.setMat4("model", model);
+
+			glBindVertexArray(cubeVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+
 		
-		// activate lamp shader
-		lampShader.use();
-		lampShader.setMat4("projection", projection);
-		lampShader.setMat4("view", view);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-		lampShader.setMat4("model", model);
-		// render lamp object
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//// activate lamp shader
+		//lampShader.use();
+		//lampShader.setMat4("projection", projection);
+		//lampShader.setMat4("view", view);
+		//model = glm::mat4(1.0f);
+		//model = glm::translate(model, lightPos);
+		//model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+		//lampShader.setMat4("model", model);
+		//// render lamp object
+		//glBindVertexArray(lightVAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// activate text shader and render text
 		textShader.use();
