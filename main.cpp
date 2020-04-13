@@ -302,11 +302,13 @@ int main()
 	glBindVertexArray(0);
 
 
-	// load texture
+	// load texture for light maps
 	unsigned int diffuseMap = loadTexture("textures/container2.png");
+	unsigned int specularMap = loadTexture("textures/container2_specular.png");
 	// set up shader for texture map
 	lightingShader.use();
 	lightingShader.setInt("material.diffuse", 0);
+	lightingShader.setInt("material.specular", 1);
 
 	int countedFrames = 0;
 	int fps = 0;
@@ -365,7 +367,11 @@ int main()
 		// bind diffuse map
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		// bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
 		
+		// projection and view
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom * 2), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.f);	
 		glm::mat4 view = camera.GetViewMatrix();
 		lightingShader.setMat4("projection", projection);
