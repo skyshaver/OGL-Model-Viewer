@@ -14,6 +14,8 @@
 #include <map>
 #include <utility>
 #include <string>
+#include <vector>
+#include <array>
 
 #include "Shader.h"
 #include "Camera.h"
@@ -210,7 +212,7 @@ int main()
 	};
 
 	// positions all containers
-	glm::vec3 cubePositions[] = {
+	std::array<glm::vec3, 10> cubePositions = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -225,7 +227,7 @@ int main()
 
 	// light positions
 	 // positions of the point lights
-	glm::vec3 pointLightPositions[] = {
+	std::array<glm::vec3, 4> pointLightPositions = {
 		glm::vec3(0.7f,  0.2f,  2.0f),
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
@@ -389,12 +391,13 @@ int main()
 		//glBindVertexArray(cubeVAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		int ci = 0;
 		glBindVertexArray(cubeVAO);
-		for (unsigned int i = 0; i < 10; i++)
+		for (const auto& cubePos : cubePositions)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
+			model = glm::translate(model, cubePos);
+			float angle = 20.0f * ci++;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			lightingShader.setMat4("model", model);
 
@@ -409,10 +412,10 @@ int main()
 		lampShader.setMat4("view", view);
 
 		glBindVertexArray(lightVAO);
-		for (unsigned int i = 0; i < 4; i++)
+		for (const auto& plPos : pointLightPositions)
 		{
 			model = glm::mat4(1.0f);
-			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::translate(model, plPos);
 			model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 			lampShader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
