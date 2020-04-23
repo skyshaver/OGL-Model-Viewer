@@ -11,14 +11,15 @@ struct Texture
 {
 	unsigned int id;
 	std::string type;
+	std::string path;
 };
 
 // ordering of members is important here as we're using offsetof to set string in gl functions, order should be Postion, Normal, TexCoords
 struct Vertex
 {
-	glm::vec3 Postion;
+	glm::vec3 Position;
 	glm::vec3 Normal;
-	glm::vec3 TexCoords;
+	glm::vec2 TexCoords;
 };
 
 

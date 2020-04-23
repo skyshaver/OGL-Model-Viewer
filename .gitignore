@@ -342,3 +342,6 @@ healthchecksdb
 
 # texture folder
 /textures
+
+# model folder
+/models
