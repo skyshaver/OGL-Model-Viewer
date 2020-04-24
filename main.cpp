@@ -17,8 +17,8 @@
 #include "TextObject.h"
 #include "Model.h"
 
-const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 1000;
+const unsigned int SCR_WIDTH = 1080;
+const unsigned int SCR_HEIGHT = 1920;
 
 // camera, this is global so that the keyboard control callbacks have access
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
@@ -117,15 +117,19 @@ int main()
 
 	TextObject textObject("fonts/arial.ttf");
 
+	// light positions
+	 // positions of the point lights
+	std::array<glm::vec3, 2> pointLightPositions = {
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(0.7f,  0.2f,  2.0f)
+	};
 
-	Shader lightingShader("shaders/model.vert", "shaders/model.frag");
-	//Shader lampShader("shaders/light_shader.vert", "shaders/light_shader.frag");
+	Shader objectShader("shaders/model.vert", "shaders/model.frag");
+	//Shader lightingShader("shaders/shader.vert", "shaders/multiple_light_shader.frag");
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
-	// enable blending for text rendering
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 
 	// buffer for text
 	GLuint textVAO, textVBO;
@@ -157,25 +161,50 @@ int main()
 		processInput(window);
 
 		// render commands
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// don't forget to enable shader before setting uniforms
-		lightingShader.use();
+		objectShader.use();
 
+		// set up lighting uniforms
+		objectShader.setVec3("viewPos", camera.Position);
+		objectShader.setFloat("shininess", 32.f);
+		// point light 1
+		objectShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+		objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		objectShader.setFloat("pointLights[0].constant", 1.0f);
+		objectShader.setFloat("pointLights[0].linear", 0.09);
+		objectShader.setFloat("pointLights[0].quadratic", 0.012);
+		// point light 2
+		objectShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		objectShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		objectShader.setFloat("pointLights[1].constant", 1.0f);
+		objectShader.setFloat("pointLights[1].linear", 0.09);
+		objectShader.setFloat("pointLights[1].quadratic", 0.032);
+
+
+		
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		lightingShader.setMat4("projection", projection);
-		lightingShader.setMat4("view", view);
+		objectShader.setMat4("projection", projection);
+		objectShader.setMat4("view", view);
 
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-		lightingShader.setMat4("model", model);
-		ourModel.Draw(lightingShader);
+		model = glm::scale(model, glm::vec3(0.15f));	// it's a bit too big for our scene, so scale it down
+		objectShader.setMat4("model", model);
+		ourModel.Draw(objectShader);
 
+		// enable blending for text rendering
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// activate text shader and render text
 		textShader.use();
 		glm::mat4 textProjection = glm::ortho(0.f, 800.f, 0.f, 600.f);
@@ -183,7 +212,7 @@ int main()
 		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), 25.f, 25.f, 0.25f, glm::vec3(0.5f, 0.8f, 0.2f), textVAO, textVBO);
 		textObject.RenderText(textShader, "Camera xpos: " + std::to_string(camera.Position.x) + 
 			 " ypos: " + std::to_string(camera.Position.y), 25.f, 50.f, 0.25f, glm::vec3(1.f, 0.f, 0.f), textVAO, textVBO);
-
+		glDisable(GL_BLEND);
 		//____________________________
 		glfwSwapBuffers(window);
 		glfwPollEvents();
