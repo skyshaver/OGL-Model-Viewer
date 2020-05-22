@@ -17,13 +17,13 @@
 #include "TextObject.h"
 #include "Model.h"
 
-const unsigned int SCR_WIDTH = 1080;
-const unsigned int SCR_HEIGHT = 1920;
+const unsigned int SCR_WIDTH = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera, this is global so that the keyboard control callbacks have access
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
-float lastX = SCR_WIDTH / 2.f;
-float lastY = SCR_HEIGHT / 2.f;
+double lastX = SCR_WIDTH / 2.f;
+double lastY = SCR_HEIGHT / 2.f;
 bool firstMouse = true;
 // time delta
 float deltaTime = 0.f;
@@ -45,18 +45,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		firstMouse = false;
 	}
 	
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+	double xoffset = xpos - lastX;
+	double yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	camera.ProcessMouseMovement(static_cast<float>(xoffset), static_cast<float>(yoffset));
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll(yoffset);
+	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 void processInput(GLFWwindow* window) 
@@ -151,10 +151,10 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		countedFrames++;
-		static float startTime = glfwGetTime();
-		float elapsedTime = glfwGetTime() - startTime;
-		fps = countedFrames / elapsedTime;
-		float currentFrame = glfwGetTime();
+		static double startTime = glfwGetTime();
+		double elapsedTime = glfwGetTime() - startTime;
+		fps = static_cast<int>(countedFrames / elapsedTime);
+		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
@@ -176,16 +176,16 @@ int main()
 		objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[0].constant", 1.0f);
-		objectShader.setFloat("pointLights[0].linear", 0.09);
-		objectShader.setFloat("pointLights[0].quadratic", 0.012);
+		objectShader.setFloat("pointLights[0].linear", 0.09f);
+		objectShader.setFloat("pointLights[0].quadratic", 0.012f);
 		// point light 2
 		objectShader.setVec3("pointLights[1].position", pointLightPositions[1]);
 		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
 		objectShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[1].constant", 1.0f);
-		objectShader.setFloat("pointLights[1].linear", 0.09);
-		objectShader.setFloat("pointLights[1].quadratic", 0.032);
+		objectShader.setFloat("pointLights[1].linear", 0.09f);
+		objectShader.setFloat("pointLights[1].quadratic", 0.032f);
 
 
 		
