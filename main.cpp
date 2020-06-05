@@ -12,6 +12,9 @@
 #include <map>
 #include <utility>
 #include <array>
+#include <thread>
+#include <chrono>
+using namespace std::chrono_literals;
 
 #include "Camera.h"
 #include "TextObject.h"
@@ -145,9 +148,19 @@ int main()
 		static double startTime = glfwGetTime();
 		double elapsedTime = glfwGetTime() - startTime;
 		fps = static_cast<int>(countedFrames / elapsedTime);
+
+		// calculate frame delta
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		// constrain frame rate
+		static const double frameDelay = 0.017;
+		if (deltaTime < frameDelay)
+		{
+			auto sleepTime = std::chrono::duration<double>(frameDelay - deltaTime);
+			std::this_thread::sleep_for(sleepTime);
+		}
 
 		processInput(window);
 
@@ -187,7 +200,7 @@ int main()
 		// render the loaded model
 		glm::mat4 model = glm::mat4(1.0f); // set to identity matrix
 		model = glm::translate(model, glm::vec3(0.0f, -1.f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.13f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.13f));	
 		objectShader.setMat4("model", model);
 		ourModel.Draw(objectShader);
 		
@@ -197,15 +210,13 @@ int main()
 		lightShader.setMat4("projection", projection);
 		lightShader.setMat4("view", view);
 
-		//glBindVertexArray(lightVAO);
 		for (unsigned int i = 0; i < pointLightPositions.size(); i++)
 		{
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, pointLightPositions[i]);
-			model = glm::scale(model, glm::vec3(0.1f)); // Make it a smaller cube
+			model = glm::scale(model, glm::vec3(0.1f)); 
 			lightShader.setMat4("model", model);
 			sphereModel.Draw(lightShader);
-			//glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		// enable blending for text rendering
