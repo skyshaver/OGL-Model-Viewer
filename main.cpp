@@ -8,6 +8,8 @@
 // do this in a cpp never in a header
 #define STB_IMAGE_IMPLEMENTATION
 
+#include <fmt/format.h>
+
 #include <iostream>
 #include <map>
 #include <utility>
@@ -226,12 +228,12 @@ int main()
 		textShader.use();
 		glm::mat4 textProjection = glm::ortho(0.f, 800.f, 0.f, 600.f);
 		textShader.setMat4("textProjection", textProjection);
-		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), 25.f, 25.f, 0.25f, glm::vec3(0.5f, 0.8f, 0.2f));
+		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), { 25.f, 25.f }, 0.3f, { 0.5f, 0.8f, 0.2f });
 		textObject.RenderText(textShader,
-			"Camera xpos: " + std::to_string(camera.Position.x) + 
-			" ypos: " + std::to_string(camera.Position.y) +
-			" zpos: " + std::to_string(camera.Position.z),
-			25.f, 50.f, 0.25f, glm::vec3(1.f, 0.f, 0.f)
+			"Camera xpos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.x)) +
+			" ypos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.y)) +
+			" zpos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.z)),
+			{ 25.f, 50.f }, 0.35f, { 1.f, 0.f, 0.f }
 			);
 		glDisable(GL_BLEND);
 		//____________________________

@@ -41,7 +41,7 @@ public:
 
 	CharacterMap createCharacterMap();
 
-	void RenderText(Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+	void RenderText(Shader& s, const std::string& text, glm::vec2 pos, GLfloat scale, const glm::vec3& color);
 private:
 	CharacterMap Characters;
 	FT_Library ft;
