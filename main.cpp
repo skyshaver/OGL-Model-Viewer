@@ -22,6 +22,7 @@ using namespace std::chrono_literals;
 #include "TextObject.h"
 #include "Model.h"
 #include "cube.h"
+#include "color_map.h"
 
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 800;
@@ -226,9 +227,9 @@ int main()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// activate text shader and render text
 		textShader.use();
-		glm::mat4 textProjection = glm::ortho(0.f, 800.f, 0.f, 600.f);
+		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH));
 		textShader.setMat4("textProjection", textProjection);
-		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), { 25.f, 25.f }, 0.3f, { 0.5f, 0.8f, 0.2f });
+		textObject.RenderText(textShader, "FPS: " + fmt::to_string(fps), { 25.f, 25.f }, 0.3f, color::nrgb["sky blue"]);
 		textObject.RenderText(textShader,
 			"Camera xpos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.x)) +
 			" ypos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.y)) +
@@ -236,6 +237,7 @@ int main()
 			{ 25.f, 50.f }, 0.35f, { 1.f, 0.f, 0.f }
 			);
 		glDisable(GL_BLEND);
+
 		//____________________________
 		glfwSwapBuffers(window);
 		glfwPollEvents();
