@@ -27,14 +27,12 @@ using CharacterMap = std::map<GLchar, Character>;
 
 class TextObject
 {
-private:
-	CharacterMap Characters;
-	FT_Library ft;
-	FT_Face face;
-	
+
 public:
 	
-	TextObject(std::string fontPath) {
+	TextObject(std::string fontPath) 
+	{
+		setUpBuffer();
 		initFreeType(fontPath);
 		Characters = createCharacterMap();
 	}
@@ -43,7 +41,13 @@ public:
 
 	CharacterMap createCharacterMap();
 
-	void RenderText(Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, GLuint VAO, GLuint VBO);
+	void RenderText(Shader& s, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+private:
+	CharacterMap Characters;
+	FT_Library ft;
+	FT_Face face;
 
+	unsigned int textVAO, textVBO;
+	void setUpBuffer();
 };
 

@@ -18,8 +18,8 @@
 #include "Model.h"
 #include "cube.h"
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 1200;
+const unsigned int SCR_WIDTH = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera, this is global so that the keyboard control callbacks have access
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
@@ -121,9 +121,9 @@ int main()
 	// light positions
 	 // positions of the point lights
 	std::array<glm::vec3, 2> pointLightPositions = {
-		// x , z, y?
-		glm::vec3(0.f,  1.f, -2.0f),
-		glm::vec3(0.f,  1.f,  2.0f)
+		// x , y, z
+		glm::vec3(-3.f,  1.f, 0.0f),
+		glm::vec3(3.f,  1.f,  0.0f)
 	};
 
 	Shader objectShader("shaders/model.vert", "shaders/model.frag");
@@ -132,20 +132,6 @@ int main()
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	
-
-	// buffer for text
-	unsigned int textVAO, textVBO;
-	glGenVertexArrays(1, &textVAO);
-	glGenBuffers(1, &textVBO);
-	glBindVertexArray(textVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-
 	Model ourModel("models/nanosuit/nanosuit.obj");
 	Model sphereModel("models/sphere/sphere.obj");
 
@@ -154,6 +140,7 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		// frame counter
 		countedFrames++;
 		static double startTime = glfwGetTime();
 		double elapsedTime = glfwGetTime() - startTime;
@@ -176,7 +163,7 @@ int main()
 		objectShader.setFloat("shininess", 32.f);
 		// point light 1
 		objectShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-		objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.25f));
 		objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[0].constant", 1.0f);
@@ -184,7 +171,7 @@ int main()
 		objectShader.setFloat("pointLights[0].quadratic", 0.012f);
 		// point light 2
 		objectShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.25f));
 		objectShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[1].constant", 1.0f);
@@ -198,9 +185,9 @@ int main()
 		objectShader.setMat4("view", view);
 
 		// render the loaded model
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.15f));	// it's a bit too big for our scene, so scale it down
+		glm::mat4 model = glm::mat4(1.0f); // set to identity matrix
+		model = glm::translate(model, glm::vec3(0.0f, -1.f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.13f));	// it's a bit too big for our scene, so scale it down
 		objectShader.setMat4("model", model);
 		ourModel.Draw(objectShader);
 		
@@ -228,9 +215,13 @@ int main()
 		textShader.use();
 		glm::mat4 textProjection = glm::ortho(0.f, 800.f, 0.f, 600.f);
 		textShader.setMat4("textProjection", textProjection);
-		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), 25.f, 25.f, 0.25f, glm::vec3(0.5f, 0.8f, 0.2f), textVAO, textVBO);
-		textObject.RenderText(textShader, "Camera xpos: " + std::to_string(camera.Position.x) + 
-			 " ypos: " + std::to_string(camera.Position.y), 25.f, 50.f, 0.25f, glm::vec3(1.f, 0.f, 0.f), textVAO, textVBO);
+		textObject.RenderText(textShader, "FPS: " + std::to_string(fps), 25.f, 25.f, 0.25f, glm::vec3(0.5f, 0.8f, 0.2f));
+		textObject.RenderText(textShader,
+			"Camera xpos: " + std::to_string(camera.Position.x) + 
+			" ypos: " + std::to_string(camera.Position.y) +
+			" zpos: " + std::to_string(camera.Position.z),
+			25.f, 50.f, 0.25f, glm::vec3(1.f, 0.f, 0.f)
+			);
 		glDisable(GL_BLEND);
 		//____________________________
 		glfwSwapBuffers(window);
