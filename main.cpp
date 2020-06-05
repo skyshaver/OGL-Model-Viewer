@@ -16,9 +16,10 @@
 #include "Camera.h"
 #include "TextObject.h"
 #include "Model.h"
+#include "cube.h"
 
-const unsigned int SCR_WIDTH = 600;
-const unsigned int SCR_HEIGHT = 800;
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 1200;
 
 // camera, this is global so that the keyboard control callbacks have access
 Camera camera(glm::vec3(0.f, 0.f, 3.f));
@@ -120,19 +121,20 @@ int main()
 	// light positions
 	 // positions of the point lights
 	std::array<glm::vec3, 2> pointLightPositions = {
-		glm::vec3(2.3f, -3.3f, -4.0f),
-		glm::vec3(0.7f,  0.2f,  2.0f)
+		// x , z, y?
+		glm::vec3(0.f,  1.f, -2.0f),
+		glm::vec3(0.f,  1.f,  2.0f)
 	};
 
 	Shader objectShader("shaders/model.vert", "shaders/model.frag");
-	//Shader lightingShader("shaders/shader.vert", "shaders/multiple_light_shader.frag");
+	Shader lightShader("shaders/light_shader.vert", "shaders/light_shader.frag");
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	
 
 	// buffer for text
-	GLuint textVAO, textVBO;
+	unsigned int textVAO, textVBO;
 	glGenVertexArrays(1, &textVAO);
 	glGenBuffers(1, &textVBO);
 	glBindVertexArray(textVAO);
@@ -145,9 +147,11 @@ int main()
 
 
 	Model ourModel("models/nanosuit/nanosuit.obj");
+	Model sphereModel("models/sphere/sphere.obj");
 
 	int countedFrames = 0;
 	int fps = 0;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		countedFrames++;
@@ -185,10 +189,8 @@ int main()
 		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[1].constant", 1.0f);
 		objectShader.setFloat("pointLights[1].linear", 0.09f);
-		objectShader.setFloat("pointLights[1].quadratic", 0.032f);
+		objectShader.setFloat("pointLights[1].quadratic", 0.012f);
 
-
-		
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -201,6 +203,23 @@ int main()
 		model = glm::scale(model, glm::vec3(0.15f));	// it's a bit too big for our scene, so scale it down
 		objectShader.setMat4("model", model);
 		ourModel.Draw(objectShader);
+		
+
+		// render the lights
+		lightShader.use();
+		lightShader.setMat4("projection", projection);
+		lightShader.setMat4("view", view);
+
+		//glBindVertexArray(lightVAO);
+		for (unsigned int i = 0; i < pointLightPositions.size(); i++)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::scale(model, glm::vec3(0.1f)); // Make it a smaller cube
+			lightShader.setMat4("model", model);
+			sphereModel.Draw(lightShader);
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// enable blending for text rendering
 		glEnable(GL_BLEND);
