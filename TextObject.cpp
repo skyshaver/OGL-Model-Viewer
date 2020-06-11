@@ -52,6 +52,9 @@ CharacterMap TextObject::createCharacterMap()
 
 void TextObject::RenderText(Shader& s, const std::string& text, glm::vec2 pos, GLfloat scale, const glm::vec3& color)
 {
+	// enable blending for text rendering
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Activate corresponding render state	
 	s.use();
 	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
@@ -92,6 +95,7 @@ void TextObject::RenderText(Shader& s, const std::string& text, glm::vec2 pos, G
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_BLEND);
 }
 
 void TextObject::setUpBuffer()

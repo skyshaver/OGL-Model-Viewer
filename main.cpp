@@ -5,7 +5,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-// do this in a cpp never in a header
+// do this in one cpp never in a header
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <fmt/format.h>
@@ -35,8 +35,6 @@ bool firstMouse = true;
 // time delta
 float deltaTime = 0.f;
 float lastFrame = 0.f;
-// light box pos
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -124,7 +122,6 @@ int main()
 
 	TextObject textObject("fonts/arial.ttf");
 
-	// light positions
 	 // positions of the point lights
 	std::array<glm::vec3, 2> pointLightPositions = {
 		// x , y, z
@@ -135,7 +132,7 @@ int main()
 	Shader objectShader("shaders/model.vert", "shaders/model.frag");
 	Shader lightShader("shaders/light_shader.vert", "shaders/light_shader.frag");
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
-	// enable depth testing
+
 	glEnable(GL_DEPTH_TEST);
 	
 	Model ourModel("models/nanosuit/nanosuit.obj");
@@ -207,24 +204,20 @@ int main()
 		objectShader.setMat4("model", model);
 		ourModel.Draw(objectShader);
 		
-
-		// render the lights
+		// render the light proxies
 		lightShader.use();
 		lightShader.setMat4("projection", projection);
 		lightShader.setMat4("view", view);
 
-		for (unsigned int i = 0; i < pointLightPositions.size(); i++)
+		for(const auto& lightpos : pointLightPositions)
 		{
 			model = glm::mat4(1.0f);
-			model = glm::translate(model, pointLightPositions[i]);
+			model = glm::translate(model, lightpos);
 			model = glm::scale(model, glm::vec3(0.1f)); 
 			lightShader.setMat4("model", model);
 			sphereModel.Draw(lightShader);
 		}
 
-		// enable blending for text rendering
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// activate text shader and render text
 		textShader.use();
 		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH));
@@ -236,7 +229,7 @@ int main()
 			" zpos: " + fmt::to_string(fmt::format("{:.2f}", camera.Position.z)),
 			{ 25.f, 50.f }, 0.35f, { 1.f, 0.f, 0.f }
 			);
-		glDisable(GL_BLEND);
+		
 
 		//____________________________
 		glfwSwapBuffers(window);
