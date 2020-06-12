@@ -71,19 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glad\include;C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glfw-3.3.2.bin.WIN64\include\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glad\include;C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glfw-3.3.2.bin.WIN64\include\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glad\include;C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glfw-3.3.2.bin.WIN64\include\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glad\include;C:\Users\skshaver\Documents\Visual Studio 2019\Libraries\glfw-3.3.2.bin.WIN64\include\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\skydev-test-00\source\repos\OGL_01\imgui_;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\skydev-test-00\source\repos\OGL_01\imgui_;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\skydev-test-00\source\repos\OGL_01\imgui_;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -145,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\skydev-test-00\source\repos\OGL_01\imgui_;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -159,6 +159,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="imgui_\imgui.cpp" />
+    <ClCompile Include="imgui_\imgui_demo.cpp" />
+    <ClCompile Include="imgui_\imgui_draw.cpp" />
+    <ClCompile Include="imgui_\imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui_\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui_\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -169,6 +175,14 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="color_map.h" />
     <ClInclude Include="cube.h" />
+    <ClInclude Include="imgui_\imconfig.h" />
+    <ClInclude Include="imgui_\imgui.h" />
+    <ClInclude Include="imgui_\imgui_impl_glfw.h" />
+    <ClInclude Include="imgui_\imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui_\imgui_internal.h" />
+    <ClInclude Include="imgui_\imstb_rectpack.h" />
+    <ClInclude Include="imgui_\imstb_textedit.h" />
+    <ClInclude Include="imgui_\imstb_truetype.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
