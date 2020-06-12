@@ -25,10 +25,10 @@ using namespace std::chrono_literals;
 #include "Camera.h"
 #include "TextObject.h"
 #include "Model.h"
-#include "cube.h"
+#include "PointLight.h"
 #include "color_map.h"
 
-const unsigned int SCR_WIDTH = 600;
+const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 800;
 
 // camera, this is global so that the keyboard control callbacks have access
@@ -39,11 +39,23 @@ bool firstMouse = true;
 // time delta
 float deltaTime = 0.f;
 float lastFrame = 0.f;
+static bool right_mouse_button_pushed = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		right_mouse_button_pushed = true;
+	else
+		right_mouse_button_pushed = false;
+}
+
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -60,8 +72,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(static_cast<float>(xoffset), static_cast<float>(yoffset));
+	// turned off till I figure out how to separate mouse camera movement from imgui input
+	if (right_mouse_button_pushed)
+		camera.ProcessMouseMovement(static_cast<float>(xoffset), static_cast<float>(yoffset));
 }
+
+
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -115,6 +131,7 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -143,28 +160,38 @@ int main()
 	// IMGUI state
 	bool show_demo_window = true;
 	bool show_another_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
 	TextObject textObject("fonts/arial.ttf");
 
 	 // positions of the point lights
-	std::array<glm::vec3, 2> pointLightPositions = {
+	std::vector<glm::vec3> pointLightPositions = {
 		// x , y, z
 		glm::vec3(-3.f,  1.f, 0.0f),
 		glm::vec3(3.f,  1.f,  0.0f)
+	};
+	
+	// positions of the point lights, in vec format so they can passed to IMGUI, may be a better way to do this
+	std::vector<std::array<float, 3>> pointLightPositionsIG = {
+		// x , y, z
+		{-3.f,  1.f, 0.0f},
+		{3.f,  1.f,  0.0f}
 	};
 
 	Shader objectShader("shaders/model.vert", "shaders/model.frag");
 	Shader lightShader("shaders/light_shader.vert", "shaders/light_shader.frag");
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
 
-	glEnable(GL_DEPTH_TEST);
-	
 	Model ourModel("models/nanosuit/nanosuit.obj");
 	Model sphereModel("models/sphere/sphere.obj");
 
+	PointLight plOne;
+	PointLight plTwo;
+
 	int countedFrames = 0;
 	int fps = 0;
+
+	glEnable(GL_DEPTH_TEST);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -190,7 +217,7 @@ int main()
 		processInput(window);
 
 		// render commands
-		glClearColor(0.f, 0.f, 0.f, 1.0f);
+		glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// IMGUI frame
@@ -201,51 +228,67 @@ int main()
 
 		// IMGUI window
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-		{
-			static float f = 0.0f;
-			static int counter = 0;
+		
+		static float lightOneAmbient = 0.25f;
+		static float lightOneDiffuse = 0.8f;
+		static float lightOneSpecular = 1.0f;
+		static float lightTwoAmbient = 0.25f;
+		static float lightTwoDiffuse = 0.8f;
+		static float lightTwoSpecular = 1.0f;
+		//static int counter = 0;
 
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Begin("Model Viewer");                          // Create a window called "Hello, world!" and append into it.
 
-			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-			ImGui::Checkbox("Another Window", &show_another_window);
+		//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+		//ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+		//ImGui::Checkbox("Another Window", &show_another_window);
 
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+		ImGui::SliderFloat("Light 1 Ambient", &lightOneAmbient, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+		ImGui::SliderFloat("Light 1 Diffuse", &lightOneDiffuse, 0.0f, 1.0f);            
+		ImGui::SliderFloat("Light 1 Specular", &lightOneSpecular, 0.0f, 1.0f);    
+		ImGui::SliderFloat("Light 2 Ambient", &lightTwoAmbient, 0.0f, 1.0f);            
+		ImGui::SliderFloat("Light 2 Diffuse", &lightTwoDiffuse, 0.0f, 1.0f);
+		ImGui::SliderFloat("Light 2 Specular", &lightTwoSpecular, 0.0f, 1.0f);
 
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
+		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-		}
+		//if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		//	counter++;
+		//ImGui::SameLine();
+		//ImGui::Text("counter = %d", counter);
 
+		ImGui::InputFloat3("light pos 1", pointLightPositionsIG.at(0).data());
+		ImGui::InputFloat3("light pos 2", pointLightPositionsIG.at(1).data());
 
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::End();
+		
 		// don't forget to enable shader before setting uniforms
 		objectShader.use();
 
 		// set up lighting uniforms
 		objectShader.setVec3("viewPos", camera.Position);
 		objectShader.setFloat("shininess", 32.f);
+
 		// point light 1
-		objectShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-		objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.25f));
-		objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		objectShader.setFloat("pointLights[0].constant", 1.0f);
-		objectShader.setFloat("pointLights[0].linear", 0.09f);
-		objectShader.setFloat("pointLights[0].quadratic", 0.012f);
+		plOne.pos = glm::make_vec3(pointLightPositionsIG.at(0).data());
+		plOne.updateLight(glm::vec3(lightOneAmbient), glm::vec3(lightOneDiffuse), glm::vec3(lightOneSpecular));
+		plOne.setShaderUniforms(objectShader, "pointLights[0]");
+		
 		// point light 2
-		objectShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+		plTwo.pos = glm::make_vec3(pointLightPositionsIG.at(1).data());
+		plTwo.updateLight(glm::vec3(lightTwoAmbient), glm::vec3(lightTwoDiffuse), glm::vec3(lightTwoSpecular));
+		plTwo.setShaderUniforms(objectShader, "pointLights[1]");
+
+
+		// point light 2
+		/*objectShader.setVec3("pointLights[1].position", glm::make_vec3(pointLightPositionsIG.at(1).data()));
 		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.25f));
 		objectShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setFloat("pointLights[1].constant", 1.0f);
 		objectShader.setFloat("pointLights[1].linear", 0.09f);
-		objectShader.setFloat("pointLights[1].quadratic", 0.012f);
+		objectShader.setFloat("pointLights[1].quadratic", 0.012f);*/
 
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -265,10 +308,10 @@ int main()
 		lightShader.setMat4("projection", projection);
 		lightShader.setMat4("view", view);
 
-		for(const auto& lightpos : pointLightPositions)
+		for(const auto& lightpos : pointLightPositionsIG)
 		{
 			model = glm::mat4(1.0f);
-			model = glm::translate(model, lightpos);
+			model = glm::translate(model, glm::make_vec3(lightpos.data()));
 			model = glm::scale(model, glm::vec3(0.1f)); 
 			lightShader.setMat4("model", model);
 			sphereModel.Draw(lightShader);
@@ -276,15 +319,16 @@ int main()
 
 		// activate text shader and render text
 		textShader.use();
-		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH));
+		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH) / 2);
 		textShader.setMat4("textProjection", textProjection);
-		textObject.RenderText(textShader, "FPS: " + fmt::to_string(fps), { 25.f, 25.f }, 0.3f, color::nrgb["sky blue"]);
+		textObject.RenderText(textShader,"Use WASD to pan and zoom, press RMB and move mouse to move camera" , { 25.f, 20.f }, 0.2f, color::nrgb["sky blue"]);
 		textObject.RenderText(textShader,
 			"Camera xpos: " + fmt::format("{:.2f}", camera.Position.x) +
 			" ypos: " + fmt::format("{:.2f}", camera.Position.y) +
 			" zpos: " + fmt::format("{:.2f}", camera.Position.z),
-			{ 25.f, 50.f }, 0.35f, { 1.f, 0.f, 0.f }
+			{ 25.f, 40.f }, 0.25f, { color::nrgb["tomato"] }
 			);
+		
 
 		// IMGUI render
 		ImGui::Render();
