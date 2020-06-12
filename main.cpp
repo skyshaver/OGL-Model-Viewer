@@ -143,7 +143,6 @@ int main()
 
 	// IMGUI setup
 
-	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -158,8 +157,6 @@ int main()
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// IMGUI state
-	bool show_demo_window = true;
-	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
 	TextObject textObject("fonts/arial.ttf");
@@ -171,7 +168,7 @@ int main()
 		glm::vec3(3.f,  1.f,  0.0f)
 	};
 	
-	// positions of the point lights, in vec format so they can passed to IMGUI, may be a better way to do this
+	// positions of the point lights, in vec format so they can passed to IMGUI, TODO may be a better way to do this
 	std::vector<std::array<float, 3>> pointLightPositionsIG = {
 		// x , y, z
 		{-3.f,  1.f, 0.0f},
@@ -221,13 +218,12 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// IMGUI frame
-		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
 		// IMGUI window
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+		// Use a Begin/End pair to created a named window.
 		
 		static float lightOneAmbient = 0.25f;
 		static float lightOneDiffuse = 0.8f;
@@ -280,16 +276,6 @@ int main()
 		plTwo.updateLight(glm::vec3(lightTwoAmbient), glm::vec3(lightTwoDiffuse), glm::vec3(lightTwoSpecular));
 		plTwo.setShaderUniforms(objectShader, "pointLights[1]");
 
-
-		// point light 2
-		/*objectShader.setVec3("pointLights[1].position", glm::make_vec3(pointLightPositionsIG.at(1).data()));
-		objectShader.setVec3("pointLights[1].ambient", glm::vec3(0.25f));
-		objectShader.setVec3("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		objectShader.setVec3("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		objectShader.setFloat("pointLights[1].constant", 1.0f);
-		objectShader.setFloat("pointLights[1].linear", 0.09f);
-		objectShader.setFloat("pointLights[1].quadratic", 0.012f);*/
-
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -322,19 +308,18 @@ int main()
 		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH) / 2);
 		textShader.setMat4("textProjection", textProjection);
 		textObject.RenderText(textShader,"Use WASD to pan and zoom, press RMB and move mouse to move camera" , { 25.f, 20.f }, 0.2f, color::nrgb["sky blue"]);
-		textObject.RenderText(textShader,
-			"Camera xpos: " + fmt::format("{:.2f}", camera.Position.x) +
-			" ypos: " + fmt::format("{:.2f}", camera.Position.y) +
-			" zpos: " + fmt::format("{:.2f}", camera.Position.z),
-			{ 25.f, 40.f }, 0.25f, { color::nrgb["tomato"] }
+		textObject.RenderText(
+				textShader,
+				"Camera xpos: " + fmt::format("{:.2f}", camera.Position.x) +
+				" ypos: " + fmt::format("{:.2f}", camera.Position.y) +
+				" zpos: " + fmt::format("{:.2f}", camera.Position.z),
+				{ 25.f, 40.f }, 0.25f, { color::nrgb["tomato"] }
 			);
 		
-
 		// IMGUI render
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		
-
 		//____________________________
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -343,7 +328,6 @@ int main()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-
 
 	glfwTerminate();
 }
