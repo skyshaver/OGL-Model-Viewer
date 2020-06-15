@@ -8,14 +8,19 @@ PointLight::PointLight() :
 	ambient(glm::vec3{ .25f }), diffuse(glm::vec3{ 0.8f }), specular(glm::vec3{ 1.f }),
 	constant(1.f), linear(0.09f), quadratic(0.012f)
 {
+}
 
+PointLight::PointLight(glm::vec3 pos) :
+	pos(pos),
+	ambient(glm::vec3{ .25f }), diffuse(glm::vec3{ 0.8f }), specular(glm::vec3{ 1.f }),
+	constant(1.f), linear(0.09f), quadratic(0.012f)
+{
 }
 
 PointLight::PointLight(glm::vec3 pos, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float constant, float linear, float quadratic) :
 	pos(pos), ambient(ambient), diffuse(diffuse),
 	specular(specular), constant(constant), linear(linear), quadratic(quadratic)
 {
-
 }
 
 void PointLight::updateLight(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular) 
