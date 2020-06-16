@@ -34,7 +34,6 @@ int main()
 	
 	GLFWwindow* window = Init::windowInit();
 
-
 	// IMGUI state
 	ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 

@@ -105,7 +105,7 @@ public:
 
 		const char* glsl_version = "#version 330";
 
-		GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOGL", nullptr, nullptr);
+		GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Model Viewer", nullptr, nullptr);
 		if (window == nullptr)
 		{
 			// std::cout << "failed to create GLFW window" << std::endl;
@@ -143,4 +143,7 @@ public:
 
 		return window;
 	}
+
+private:
+	// GLFW callbacks
 };
