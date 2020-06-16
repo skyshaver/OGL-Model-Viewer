@@ -1,3 +1,7 @@
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -9,22 +13,20 @@
 
 #include <fmt/format.h>
 
+#include <array>
+#include <chrono>
 #include <iostream>
 #include <map>
-#include <utility>
-#include <array>
 #include <thread>
-#include <chrono>
+#include <utility>
 using namespace std::chrono_literals;
 
 #include "Camera.h"
-#include "TextObject.h"
 #include "Model.h"
-#include "PointLight.h"
-#include "color_map.h"
-
-//#include "Init.h"
 #include "MVWindow.h"
+#include "PointLight.h"
+#include "TextObject.h"
+#include "color_map.h"
 
 // time delta
 float deltaTime = 0.f;
@@ -32,8 +34,29 @@ float lastFrame = 0.f;
 
 int main() 
 {
-	
-	MVWindow window;
+	if (!glfwInit())
+	{
+		std::cout << "failed to init GLFW" << '\n';
+		return -1;
+	}
+
+	MVWindow window(1200, 800, "Model View");
+
+	//MVWindow second(1200, 800, "second"); // TODO look into window context object sharing for creating a second window https://www.glfw.org/docs/3.3/context_guide.html
+
+	// IMGUI setup
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplGlfw_InitForOpenGL(window.windowPtr(), true);
+	ImGui_ImplOpenGL3_Init(window.glslVersion());
 
 	// IMGUI state
 	ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
@@ -59,6 +82,7 @@ int main()
 	Shader textShader("shaders/text_shader.vert", "shaders/text_shader.frag");
 
 	Model ourModel("models/nanosuit/nanosuit.obj");
+	//Model ourModel("models/squid/squid.obj");
 	Model sphereModel("models/sphere/sphere.obj");
 
 	PointLight plOne;
@@ -83,7 +107,7 @@ int main()
 		lastFrame = currentFrame;
 
 		// constrain frame rate
-		static const double frameDelay = 0.017;
+		static const double frameDelay = 0.032; // something is wonky with frame delay calculation, this should be 0.016 for 60fps
 		if (deltaTime < frameDelay)
 		{
 			auto sleepTime = std::chrono::duration<double>(frameDelay - deltaTime);
@@ -112,7 +136,7 @@ int main()
 		static float lightTwoSpecular = 1.0f;
 		//static int counter = 0;
 
-		ImGui::Begin("Model Viewer");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Begin("Model Viewer");                          
 
 		//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 		//ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
@@ -156,7 +180,7 @@ int main()
 		plTwo.setShaderUniforms(objectShader, "pointLights[1]");
 
 		// view/projection transformations
-		glm::mat4 projection = glm::perspective(glm::radians(window.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(window.camera.Zoom), static_cast<float>(window.getWidth()) / static_cast<float>(window.getHeight()), 0.1f, 100.0f);
 		glm::mat4 view = window.camera.GetViewMatrix();
 		objectShader.setMat4("projection", projection);
 		objectShader.setMat4("view", view);
@@ -184,7 +208,7 @@ int main()
 
 		// activate text shader and render text
 		textShader.use();
-		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(SCR_HEIGHT), 0.f, static_cast<float>(SCR_WIDTH) / 2);
+		glm::mat4 textProjection = glm::ortho(0.f, static_cast<float>(window.getHeight()), 0.f, static_cast<float>(window.getWidth()) / 2);
 		textShader.setMat4("textProjection", textProjection);
 		textObject.RenderText(textShader,"Use WASD to pan and zoom, press RMB and move mouse to move camera" , { 25.f, 20.f }, 0.2f, color::nrgb["sky blue"]);
 		textObject.RenderText(
@@ -200,7 +224,7 @@ int main()
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		
 		//____________________________
-		glfwSwapBuffers(window.windowPtr());
+		glfwSwapBuffers(window.windowPtr());		
 		glfwPollEvents();
 	}
 	// IMGUI cleanup

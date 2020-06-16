@@ -1,16 +1,15 @@
 #include "MVWindow.h"
 
 
-MVWindow::MVWindow()
+MVWindow::MVWindow(const unsigned int SCR_WIDTH, const unsigned int SCR_HEIGHT, const std::string& name) :
+	SCR_HEIGHT(SCR_HEIGHT), SCR_WIDTH(SCR_WIDTH)
 {
-	glfwInit();
+	//glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	const char* glsl_version = "#version 330";
-
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Model Viewer", nullptr, nullptr);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), nullptr, nullptr);
 
 	if (window == nullptr)
 	{
@@ -21,8 +20,8 @@ MVWindow::MVWindow()
 	glfwMakeContextCurrent(window);
 
 	// set up casting for callbacks
-	MVWindow* myWindow = this;
-	glfwSetWindowUserPointer(window, myWindow);
+	//MVWindow* myWindow = this;
+	glfwSetWindowUserPointer(window, this);
 
 	auto frameBufferCallBack = [](GLFWwindow* w, int width, int height)
 	{
@@ -30,7 +29,7 @@ MVWindow::MVWindow()
 	};
 	glfwSetFramebufferSizeCallback(window, frameBufferCallBack);
 
-	auto mouseButtonCallBack = [](GLFWwindow * w, int button, int action, int mods)
+	auto mouseButtonCallBack = [](GLFWwindow* w, int button, int action, int mods)
 	{
 		static_cast<MVWindow*>(glfwGetWindowUserPointer(w))->mouse_button_callback(w, button, action, mods);
 	};
@@ -48,30 +47,15 @@ MVWindow::MVWindow()
 	};
 	glfwSetScrollCallback(window, scrollCallBack);
 	
-
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
-	// GLADS setup
+	// GLAD setup
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		// std::cout << "failed to initialize GLAD" << std::endl;
 		throw std::runtime_error("failed to initialize GLAD");
 	}
 
-	// IMGUI setup
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-
-	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 void MVWindow::processInput(GLFWwindow* window, float deltaTime)
@@ -106,10 +90,7 @@ void MVWindow::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 
 void MVWindow::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-		right_mouse_button_pushed = true;
-	else
-		right_mouse_button_pushed = false;
+	right_mouse_button_pushed = (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
 }
 
 void MVWindow::mouse_callback(GLFWwindow* window, double xpos, double ypos)
