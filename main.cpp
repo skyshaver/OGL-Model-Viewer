@@ -23,7 +23,8 @@ using namespace std::chrono_literals;
 #include "PointLight.h"
 #include "color_map.h"
 
-#include "Init.h"
+//#include "Init.h"
+#include "MVWindow.h"
 
 // time delta
 float deltaTime = 0.f;
@@ -32,7 +33,7 @@ float lastFrame = 0.f;
 int main() 
 {
 	
-	GLFWwindow* window = Init::windowInit();
+	MVWindow window;
 
 	// IMGUI state
 	ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
@@ -68,7 +69,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window.windowPtr()))
 	{
 		// frame counter
 		countedFrames++;
@@ -89,7 +90,7 @@ int main()
 			std::this_thread::sleep_for(sleepTime);
 		}
 
-		processInput(window, deltaTime);
+		window.processInput(window.windowPtr(), deltaTime);
 
 		// render commands
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
@@ -141,7 +142,7 @@ int main()
 		objectShader.use();
 
 		// set up lighting uniforms
-		objectShader.setVec3("viewPos", camera.Position);
+		objectShader.setVec3("viewPos", window.camera.Position);
 		objectShader.setFloat("shininess", 32.f);
 
 		// point light 1
@@ -155,8 +156,8 @@ int main()
 		plTwo.setShaderUniforms(objectShader, "pointLights[1]");
 
 		// view/projection transformations
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 projection = glm::perspective(glm::radians(window.camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = window.camera.GetViewMatrix();
 		objectShader.setMat4("projection", projection);
 		objectShader.setMat4("view", view);
 
@@ -188,9 +189,9 @@ int main()
 		textObject.RenderText(textShader,"Use WASD to pan and zoom, press RMB and move mouse to move camera" , { 25.f, 20.f }, 0.2f, color::nrgb["sky blue"]);
 		textObject.RenderText(
 				textShader,
-				"Camera xpos: " + fmt::format("{:.2f}", camera.Position.x) +
-				" ypos: " + fmt::format("{:.2f}", camera.Position.y) +
-				" zpos: " + fmt::format("{:.2f}", camera.Position.z),
+				"Camera xpos: " + fmt::format("{:.2f}", window.camera.Position.x) +
+				" ypos: " + fmt::format("{:.2f}", window.camera.Position.y) +
+				" zpos: " + fmt::format("{:.2f}", window.camera.Position.z),
 				{ 25.f, 40.f }, 0.25f, { color::nrgb["tomato"] }
 			);
 		
@@ -199,7 +200,7 @@ int main()
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		
 		//____________________________
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window.windowPtr());
 		glfwPollEvents();
 	}
 	// IMGUI cleanup

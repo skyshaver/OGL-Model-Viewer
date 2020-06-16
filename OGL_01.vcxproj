@@ -171,7 +171,7 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="TextObject.cpp" />
-    <ClCompile Include="WindowInit.cpp" />
+    <ClCompile Include="MVWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -185,13 +185,12 @@
     <ClInclude Include="imgui_\imstb_rectpack.h" />
     <ClInclude Include="imgui_\imstb_textedit.h" />
     <ClInclude Include="imgui_\imstb_truetype.h" />
-    <ClInclude Include="Init.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="TextObject.h" />
-    <ClInclude Include="WindowInit.h" />
+    <ClInclude Include="MVWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

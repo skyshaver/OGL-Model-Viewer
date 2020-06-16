@@ -57,7 +57,7 @@
     <ClCompile Include="PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowInit.cpp">
+    <ClCompile Include="MVWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,10 +110,7 @@
     <ClInclude Include="PointLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Init.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowInit.h">
+    <ClInclude Include="MVWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

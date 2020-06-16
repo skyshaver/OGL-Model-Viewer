@@ -1,7 +1,7 @@
-#include "WindowInit.h"
+#include "MVWindow.h"
 
 
-WindowInit::WindowInit()
+MVWindow::MVWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -10,42 +10,43 @@ WindowInit::WindowInit()
 
 	const char* glsl_version = "#version 330";
 
-	window = std::make_unique<GLFWwindow>(glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Model Viewer", nullptr, nullptr));
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Model Viewer", nullptr, nullptr);
+
 	if (window == nullptr)
 	{
 		// std::cout << "failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		throw std::runtime_error("failed to create GLFW window");
 	}
-	glfwMakeContextCurrent(window.get());
+	glfwMakeContextCurrent(window);
 
 	// set up casting for callbacks
-	WindowInit* myWindow;
-	glfwSetWindowUserPointer(window.get(), myWindow);
+	MVWindow* myWindow = this;
+	glfwSetWindowUserPointer(window, myWindow);
 
 	auto frameBufferCallBack = [](GLFWwindow* w, int width, int height)
 	{
-		static_cast<WindowInit*>(glfwGetWindowUserPointer(w))->framebuffer_size_callback(w, width, height);
+		static_cast<MVWindow*>(glfwGetWindowUserPointer(w))->framebuffer_size_callback(w, width, height);
 	};
-	glfwSetFramebufferSizeCallback(window.get(), frameBufferCallBack);
+	glfwSetFramebufferSizeCallback(window, frameBufferCallBack);
 
 	auto mouseButtonCallBack = [](GLFWwindow * w, int button, int action, int mods)
 	{
-		static_cast<WindowInit*>(glfwGetWindowUserPointer(w))->mouse_button_callback(w, button, action, mods);
+		static_cast<MVWindow*>(glfwGetWindowUserPointer(w))->mouse_button_callback(w, button, action, mods);
 	};
-	glfwSetMouseButtonCallback(window.get(), mouseButtonCallBack);
+	glfwSetMouseButtonCallback(window, mouseButtonCallBack);
 
 	auto mouseCallBack = [](GLFWwindow* w, double xpos, double ypos)
 	{
-		static_cast<WindowInit*>(glfwGetWindowUserPointer(w))-> mouse_callback(w, xpos, ypos);
+		static_cast<MVWindow*>(glfwGetWindowUserPointer(w))-> mouse_callback(w, xpos, ypos);
 	};
-	glfwSetCursorPosCallback(window.get(), mouseCallBack);
+	glfwSetCursorPosCallback(window, mouseCallBack);
 
 	auto scrollCallBack = [](GLFWwindow* w, double xoffset, double yoffset)
 	{
-		static_cast<WindowInit*>(glfwGetWindowUserPointer(w))->scroll_callback(w, xoffset, yoffset);
+		static_cast<MVWindow*>(glfwGetWindowUserPointer(w))->scroll_callback(w, xoffset, yoffset);
 	};
-	glfwSetScrollCallback(window.get(), scrollCallBack);
+	glfwSetScrollCallback(window, scrollCallBack);
 	
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -69,11 +70,11 @@ WindowInit::WindowInit()
 	ImGui::StyleColorsDark();
 
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForOpenGL(window.get(), true);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-void WindowInit::processInput(GLFWwindow* window, float deltaTime)
+void MVWindow::processInput(GLFWwindow* window, float deltaTime)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
@@ -98,12 +99,12 @@ void WindowInit::processInput(GLFWwindow* window, float deltaTime)
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) { camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime); }
 }
 
-void WindowInit::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void MVWindow::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
-void WindowInit::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void MVWindow::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 		right_mouse_button_pushed = true;
@@ -111,7 +112,7 @@ void WindowInit::mouse_button_callback(GLFWwindow* window, int button, int actio
 		right_mouse_button_pushed = false;
 }
 
-void WindowInit::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void MVWindow::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)
 	{
@@ -132,7 +133,7 @@ void WindowInit::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 }
 
-void WindowInit::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void MVWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }

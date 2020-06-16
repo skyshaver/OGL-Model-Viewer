@@ -12,24 +12,24 @@
 
 #include "Camera.h"
 
-class WindowInit
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 800;
+
+class MVWindow
 {
 public:
 
-	WindowInit();
+	MVWindow();
 
-	GLFWwindow* windowPtr() { return window.get(); }
+	GLFWwindow* windowPtr() { return window; }
 	void processInput(GLFWwindow* window, float deltaTime);
-	// camera, this is global so that the keyboard control callbacks have access
+	// this is public so that the shader uniforms in main have access, may need to write a getter and make it private?
 	Camera camera{ glm::vec3(0.f, 0.f, 3.f) };
 
 private:
 
-	std::unique_ptr<GLFWwindow> window;
-
-	const unsigned int SCR_WIDTH = 1200;
-	const unsigned int SCR_HEIGHT = 800;
-
+	
+	GLFWwindow* window;
 	double lastX = SCR_WIDTH / 2.f;
 	double lastY = SCR_HEIGHT / 2.f;
 	bool firstMouse = true;
